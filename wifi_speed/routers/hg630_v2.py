@@ -2,6 +2,7 @@ from .base import BaseRouter, RouterException
 from ..util import *
 from base64 import b64encode
 from hashlib import sha256
+import json
 
 class HG630_v2(BaseRouter):
     def __init__(self):
@@ -31,17 +32,15 @@ class HG630_v2(BaseRouter):
         pwd += self.csrf["csrf_param"]
         pwd += self.csrf["csrf_token"]
         pwd = sha256(pwd.encode("utf-8")).hexdigest()
-        payload, length = json_stringify({
+        payload = {
             "csrf": self.csrf,
             "data": {
                 "UserName": username,
                 "Password": pwd
             }
-        })
+        }
 
-        page = self.fetch.post(f"{self.url}/api/system/user_login", data=payload, headers={
-            "Content-Length": length
-        })
+        page = self.fetch.post(f"{self.url}/api/system/user_login", data=json.dumps(payload))
 
         if '"errorCategory":"ok"' in page.text:
             data = json.loads(page.text[12:-2])
@@ -58,7 +57,7 @@ class HG630_v2(BaseRouter):
         if speed not in self.speeds:
             raise Exception("Invalid speed value")
 
-        payload, length = json_stringify({
+        payload = {
             "csrf": self.csrf,
             "action": "SendSettings",
             "data": {
@@ -72,13 +71,10 @@ class HG630_v2(BaseRouter):
                     "rate": "0" if speed == "default" else speed
                 }
             }
-        })
+        }
 
         try:
-            self.fetch.post(f"{self.url}/api/ntwk/WlanBasic?showpass=false",
-                            data=payload,
-                            headers={"Content-Length": length},
-                            timeout=1)
+            self.fetch.post(f"{self.url}/api/ntwk/WlanBasic?showpass=false", data=json.dumps(payload), timeout=1)
         except Exception as err:
             if not "HTTPSConnectionPool" in str(err):
                 raise err

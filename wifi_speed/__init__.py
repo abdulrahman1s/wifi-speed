@@ -22,7 +22,7 @@ def main():
     speed = question.select(
         "Enter the speed you want",
         choices=router.speeds,
-        default=router.speeds[0]
+        default=router.speeds[-1]
     ).ask()
 
     try:
