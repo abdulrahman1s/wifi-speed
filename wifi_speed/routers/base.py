@@ -7,7 +7,7 @@ class BaseRouter:
         self.url = "https://192.168.1.1"
         self.speeds = []
         self.fetch = fetch_client()
-        self.html = pq(self.fetch.get("https://192.168.1.1").text)
+        self.html = pq(self.fetch.get(self.url).text)
         self.logged_in = False
 
     def login(self, username, password):
